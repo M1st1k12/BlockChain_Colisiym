@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,14 +25,15 @@ namespace BlockChain_Colisiym
                 Index = 0,
                 Data = "Genesis Block",
                 PreviousHash = "0",
-                TimeStamp = DateTime.Parse("2026-08-11")
+                TimeStamp = DateTime.Parse("2026-08-11"),
+                Author = "Colisiym"
             };
             genesisBlock.Hash = _hashingService.ComputeBlockHash(genesisBlock);
             Chain.Add(genesisBlock);
 
         }
 
-        public void AddBlock(string data)
+        public void AddBlock(string data, string author = "Colisiym")
         {
             var lastBlock = Chain[Chain.Count - 1];
             var newBlock = new Block
@@ -40,7 +41,8 @@ namespace BlockChain_Colisiym
                 Index = lastBlock.Index + 1,
                 Data = data,
                 PreviousHash = lastBlock.Hash,
-                TimeStamp = DateTime.Now
+                TimeStamp = DateTime.Now,
+                Author = author
             };
             newBlock.Hash = _hashingService.ComputeBlockHash(newBlock);
             Chain.Add(newBlock);
@@ -77,6 +79,7 @@ namespace BlockChain_Colisiym
                 Console.WriteLine($"Data: {block.Data}");
                 Console.WriteLine($"Previous Hash: {block.PreviousHash}");
                 Console.WriteLine($"Timestamp: {block.TimeStamp}");
+                Console.WriteLine($"Author: {block.Author}");
             }
             else
             {
@@ -97,6 +100,7 @@ namespace BlockChain_Colisiym
                     Console.WriteLine($"Previous Hash: {block.PreviousHash}");
                     Console.WriteLine($"Data: {block.Data}");
                     Console.WriteLine($"Timestamp: {block.TimeStamp}");
+                    Console.WriteLine($"Author: {block.Author}");
                     Console.WriteLine(new string('-', 30));
                 }
             }

@@ -1,4 +1,4 @@
-﻿using BlockChain_Colisiym;
+using BlockChain_Colisiym;
 
 //var blockChainService = new BlockChain();
 //var displayService = new DisplayService();
@@ -37,11 +37,11 @@
 var blockChainService = new BlockChain();
 var displayService = new DisplayService();
 
-blockChainService.AddBlock("Register user: Bob");
-blockChainService.AddBlock("Bob buy iPhone 16");
-blockChainService.AddBlock("Bob send 1000 USD to AppleStore");
-blockChainService.AddBlock("Sign in user: Bob");
-blockChainService.AddBlock("Create order: Bob, iPhone 16, 1000 USD");
+blockChainService.AddBlock("Register user: Bob", "System");
+blockChainService.AddBlock("Bob buy iPhone 16", "Bob");
+blockChainService.AddBlock("Bob send 1000 USD to AppleStore", "Bob");
+blockChainService.AddBlock("Sign in user: Bob", "Bob");
+blockChainService.AddBlock("Create order: Bob, iPhone 16, 1000 USD", "AppleStore");
 
 if (blockChainService.IsValid())
 {
@@ -56,3 +56,16 @@ displayService.DisplayChain(blockChainService);
 Console.WriteLine(new string('-', 30));
 blockChainService.SearchBlockByIndex(2);
 blockChainService.SearchEventByText("iPhone 16");
+
+// Проверяем, что хеш учитывает поле Author (пробуем подменить автора)
+Console.WriteLine(new string('-', 30));
+blockChainService.Chain[1].Author = "Sasha";
+Console.WriteLine("Changed Block 1 Author to Sasha");
+if (blockChainService.IsValid())
+{
+    Console.WriteLine("The blockchain is valid.");
+}
+else
+{
+    Console.WriteLine("The blockchain is not valid.");
+}

@@ -11,7 +11,7 @@ namespace BlockChain_Colisiym
         public string ComputeBlockHash(Block block)
         {
             //формируем строку из данных блока для хеширования
-            var blockData = $"{block.Index}{block.PreviousHash}{block.TimeStamp}{block.Data}";
+            var blockData = $"{block.Index}{block.PreviousHash}{block.TimeStamp}{block.Data}{block.Author}";
             return ComputeHash(blockData);
         }
 

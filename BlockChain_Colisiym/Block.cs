@@ -21,5 +21,7 @@ namespace BlockChain_Colisiym
         //хеш преведущего блока
         public string PreviousHash { get; set; }
         public DateTime TimeStamp { get; set; }
+
+       public string Author { get; set; }
     }
 }

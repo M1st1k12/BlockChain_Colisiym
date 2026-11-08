@@ -17,6 +17,7 @@ namespace BlockChain_Colisiym
                 Console.WriteLine($"Data: {block.Data}");
                 Console.WriteLine($"Previous Hash: {block.PreviousHash}");
                 Console.WriteLine($"Timestamp: {block.TimeStamp}");
+                Console.WriteLine($"Author: {block.Author}");
                 Console.WriteLine(new string('-', 30));
             }
         }
