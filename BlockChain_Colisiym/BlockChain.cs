@@ -32,9 +32,9 @@ namespace BlockChain_Colisiym
 
         }
 
-        public void AddBlock(string data)   
+        public void AddBlock(string data)
         {
-            var lastBlock = Chain[Chain.Count-1];
+            var lastBlock = Chain[Chain.Count - 1];
             var newBlock = new Block
             {
                 Index = lastBlock.Index + 1,
@@ -65,6 +65,46 @@ namespace BlockChain_Colisiym
             }
             return true;
         }
-    }
 
+
+        public void SearchBlockByIndex(int index)
+        {
+            var block = Chain.FirstOrDefault(b => b.Index == index);
+            if (block != null)
+            {
+                Console.WriteLine($"Index: {block.Index}");
+                Console.WriteLine($"Hash: {block.Hash}");
+                Console.WriteLine($"Data: {block.Data}");
+                Console.WriteLine($"Previous Hash: {block.PreviousHash}");
+                Console.WriteLine($"Timestamp: {block.TimeStamp}");
+            }
+            else
+            {
+                Console.WriteLine($"Block with index {index} not found.");
+            }
+        }
+
+
+        public void SearchEventByText(string text)
+        {
+            var blocks = Chain.FindAll(b => b.Data.Contains(text));
+            if (blocks.Count > 0)
+            {
+                foreach (var block in blocks)
+                {
+                    Console.WriteLine($"Block Index: {block.Index}");
+                    Console.WriteLine($"Block Hash: {block.Hash}");
+                    Console.WriteLine($"Previous Hash: {block.PreviousHash}");
+                    Console.WriteLine($"Data: {block.Data}");
+                    Console.WriteLine($"Timestamp: {block.TimeStamp}");
+                    Console.WriteLine(new string('-', 30));
+                }
+            }
+            else
+            {
+                Console.WriteLine($"No blocks found containing the text '{text}'.");
+            }
+        }
+
+    }
 }

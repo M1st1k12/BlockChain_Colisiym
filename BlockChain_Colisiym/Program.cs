@@ -37,4 +37,22 @@
 var blockChainService = new BlockChain();
 var displayService = new DisplayService();
 
-    
+blockChainService.AddBlock("Register user: Bob");
+blockChainService.AddBlock("Bob buy iPhone 16");
+blockChainService.AddBlock("Bob send 1000 USD to AppleStore");
+blockChainService.AddBlock("Sign in user: Bob");
+blockChainService.AddBlock("Create order: Bob, iPhone 16, 1000 USD");
+
+if (blockChainService.IsValid())
+{
+    Console.WriteLine("The blockchain is valid.");
+}
+else
+{
+    Console.WriteLine("The blockchain is not valid.");
+}
+
+displayService.DisplayChain(blockChainService);
+Console.WriteLine(new string('-', 30));
+blockChainService.SearchBlockByIndex(2);
+blockChainService.SearchEventByText("iPhone 16");
