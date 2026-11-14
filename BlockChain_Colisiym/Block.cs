@@ -23,5 +23,8 @@ namespace BlockChain_Colisiym
         public DateTime TimeStamp { get; set; }
 
        public string Author { get; set; }
+        // Поле для хранения nonce, используемого в процессе майнинга
+        public int Nonce { get; set; } 
+
     }
 }

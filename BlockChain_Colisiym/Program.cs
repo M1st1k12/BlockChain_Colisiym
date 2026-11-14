@@ -34,38 +34,37 @@ using BlockChain_Colisiym;
 //    Console.WriteLine("The blockchain is not valid.");
 //}
 
-var blockChainService = new BlockChain();
-var displayService = new DisplayService();
+//var blockChainService = new BlockChain(5);
+//var blockChainService = new BlockChain("Sasha");
+//DisplayService displayService = new DisplayService();
+//
+//blockChainService.AddBlock("alex send 1 BTC Bob ");
+//
+//displayService.DisplayChain(blockChainService);
+//Console.WriteLine($"Is blockchain valid? {blockChainService.IsValid()}");
 
-blockChainService.AddBlock("Register user: Bob", "System");
-blockChainService.AddBlock("Bob buy iPhone 16", "Bob");
-blockChainService.AddBlock("Bob send 1000 USD to AppleStore", "Bob");
-blockChainService.AddBlock("Sign in user: Bob", "Bob");
-blockChainService.AddBlock("Create order: Bob, iPhone 16, 1000 USD", "AppleStore");
+using System.Diagnostics;
 
-if (blockChainService.IsValid())
-{
-    Console.WriteLine("The blockchain is valid.");
-}
-else
-{
-    Console.WriteLine("The blockchain is not valid.");
-}
+var blockChainService = new BlockChain("Sash");
+DisplayService displayService = new DisplayService();
 
-displayService.DisplayChain(blockChainService);
-Console.WriteLine(new string('-', 30));
-blockChainService.SearchBlockByIndex(2);
-blockChainService.SearchEventByText("iPhone 16");
+Stopwatch sw1 = Stopwatch.StartNew();
+blockChainService.AddBlock("alex send 1 BTC Bob ");
+blockChainService.AddBlock("Bob 0.5 BTC to Charlie");
+blockChainService.AddBlock("Charlie 0.2 BTC to Dave");
+sw1.Stop();
 
-// Проверяем, что хеш учитывает поле Author (пробуем подменить автора)
-Console.WriteLine(new string('-', 30));
-blockChainService.Chain[1].Author = "Sasha";
-Console.WriteLine("Changed Block 1 Author to Sasha");
-if (blockChainService.IsValid())
-{
-    Console.WriteLine("The blockchain is valid.");
-}
-else
-{
-    Console.WriteLine("The blockchain is not valid.");
-}
+var blockChainService2 = new BlockChain("Sash");
+
+Stopwatch sw2 = Stopwatch.StartNew();
+await blockChainService2.AddBlockAsync("alex send 1 BTC Bob ");
+await blockChainService2.AddBlockAsync("Bob 0.5 BTC to Charlie");
+await blockChainService2.AddBlockAsync("Charlie 0.2 BTC to Dave");
+sw2.Stop();
+
+displayService.DisplayChain(blockChainService2);
+Console.WriteLine($"Is blockchain valid? {blockChainService2.IsValid()}");
+Console.WriteLine($"Normal mining time: {sw1.ElapsedMilliseconds} ms");
+Console.WriteLine($"Async multithreaded mining time: {sw2.ElapsedMilliseconds} ms");
+
+

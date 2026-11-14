@@ -11,19 +11,41 @@ namespace BlockChain_Colisiym
         public string ComputeBlockHash(Block block)
         {
             //формируем строку из данных блока для хеширования
-            var blockData = $"{block.Index}{block.PreviousHash}{block.TimeStamp}{block.Data}{block.Author}";
+            var blockData = $"{block.Index}{block.PreviousHash}{block.TimeStamp}{block.Data}{block.Author}{block.Nonce}";
             return ComputeHash(blockData);
         }
 
-        private string ComputeHash(string data)
-     {
-            //используем SHA256 для вычисления хеша
-            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+        //вычисляем хеш блока с отдельным nonce для потоков
+        public string ComputeBlockHash(Block block, int nonce)
         {
+            var blockData = $"{block.Index}{block.PreviousHash}{block.TimeStamp}{block.Data}{block.Author}{nonce}";
+            return ComputeHash(blockData);
+        }
+
+        //   private string ComputeHash(string data)
+        //{
+        //       //используем SHA256 для вычисления хеша
+        //       using (var sha256 = System.Security.Cryptography.SHA256.Create())
+        //   {
+        //       var bytes = Encoding.UTF8.GetBytes(data);
+        //       var hashBytes = sha256.ComputeHash(bytes);
+        //       return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+        //       }
+
+        private string ComputeHash(string data)
+        {
+            //using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            //{
+            //    var bytes = Encoding.UTF8.GetBytes(data);
+            //    var hashBytes = sha256.ComputeHash(bytes);
+            //
+            //    // Кодируем в Base64
+            //    return Convert.ToBase64String(hashBytes);
+            //}
+
             var bytes = Encoding.UTF8.GetBytes(data);
-            var hashBytes = sha256.ComputeHash(bytes);
-            return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
-            }
+            var hashBytes = System.Security.Cryptography.SHA256.HashData(bytes);
+            return Convert.ToBase64String(hashBytes);
         }
     }
 }
