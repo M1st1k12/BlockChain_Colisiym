@@ -22,6 +22,14 @@ namespace BlockChain_Colisiym
         //    AddGenesisBlock("Genesis Block");
         //}
 
+        public BlockChain()
+        {
+            Chain = new List<Block>();
+            _hashingService = new HashingService();
+            _miningService = new MiningService(_hashingService);
+            AddGenesisBlock("Genesis Block");
+        }
+
         public string TargetPrefix { get; set; } = "alex";
         public BlockChain(string targetPrefix)
         {
@@ -43,7 +51,8 @@ namespace BlockChain_Colisiym
                 Author = "Colisiym"
             };
            //_miningService.MineBlock(genesisBlock, 1);
-           _miningService.MineBlock(genesisBlock, TargetPrefix);
+           //_miningService.MineBlock(genesisBlock, TargetPrefix);
+           _miningService.MineBlockAsync(genesisBlock, TargetPrefix).Wait();
             Chain.Add(genesisBlock);
 
         }
@@ -95,10 +104,12 @@ namespace BlockChain_Colisiym
                 // Проверяем, что хеш текущего блока совпадает с вычисленным хешем
                 if (currentBlock.Hash != _hashingService.ComputeBlockHash(currentBlock))
                 {
+                    Console.WriteLine($"First invalid block index: {currentBlock.Index}");
                     return false;
                 }
                 if (currentBlock.PreviousHash != previousBlock.Hash)
                 {
+                    Console.WriteLine($"First invalid block index: {currentBlock.Index}");
                     return false;
                 }
                 //if (currentBlock.Hash.Substring(0, Difficulty) != new string('0', Difficulty))
@@ -107,6 +118,7 @@ namespace BlockChain_Colisiym
                 //}
                 if (!currentBlock.Hash.StartsWith(TargetPrefix, StringComparison.OrdinalIgnoreCase))
                 {
+                    Console.WriteLine($"First invalid block index: {currentBlock.Index}");
                     return false;
                 }
             }
@@ -125,6 +137,7 @@ namespace BlockChain_Colisiym
                 Console.WriteLine($"Previous Hash: {block.PreviousHash}");
                 Console.WriteLine($"Timestamp: {block.TimeStamp}");
                 Console.WriteLine($"Author: {block.Author}");
+                Console.WriteLine($"Nonce: {block.Nonce}");
             }
             else
             {
@@ -146,6 +159,7 @@ namespace BlockChain_Colisiym
                     Console.WriteLine($"Data: {block.Data}");
                     Console.WriteLine($"Timestamp: {block.TimeStamp}");
                     Console.WriteLine($"Author: {block.Author}");
+                    Console.WriteLine($"Nonce: {block.Nonce}");
                     Console.WriteLine(new string('-', 30));
                 }
             }
