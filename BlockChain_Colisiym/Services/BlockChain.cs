@@ -17,7 +17,8 @@ namespace BlockChain_Colisiym.Services
         public List<Block> Chain { get; set; }
         private readonly HashingService _hashingService;
         private readonly MiningService _miningService;
-        private readonly TransactionService _transactionService = new TransactionService();
+        private readonly WalletService _walletService;
+        private readonly TransactionService _transactionService;
 
         public int Difficulty { get; private set; } = 10;
 
@@ -28,6 +29,8 @@ namespace BlockChain_Colisiym.Services
             this._difficulty = difficulty;
             this.Difficulty = difficulty;
             _miningService = new MiningService(_hashingService);
+            _transactionService = new TransactionService();
+            _walletService = new WalletService();
             AddGenesisBlock("Genesis Block");
         }
 

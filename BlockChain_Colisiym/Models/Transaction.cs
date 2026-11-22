@@ -18,6 +18,12 @@ namespace BlockChain_Colisiym.Models
         // Дата и время создания транзакции
         public DateTime Timestamp { get; set; }
 
+        // Публичный ключ отправителя транзакции
+        public byte[] PublicKey { get; set; }
+
+        // Подпись транзакции, созданная отправителем с помощью приватного ключа
+        public byte[] Signature { get; set; }
+
         // Конструктор для создания транзакции
         public Transaction(string from, string to, decimal amount)
         {
@@ -25,6 +31,16 @@ namespace BlockChain_Colisiym.Models
             From = from;
             To = to;
             Amount = amount;
+            Timestamp = DateTime.Now;
+        }
+
+        public Transaction(string from, string to, decimal amount, byte[] publicKey)
+        {
+            Id = Guid.NewGuid().ToString();
+            From = from;
+            To = to;
+            Amount = amount;
+            PublicKey = publicKey;
             Timestamp = DateTime.Now;
         }
 
@@ -38,6 +54,13 @@ namespace BlockChain_Colisiym.Models
         public override string ToString()
         {
             return $"Transaction ID: {Id}, From: {From}, To: {To}, Amount: {Amount}, Timestamp: {Timestamp}";
+        }
+
+        // Метод для получения данных транзакции в виде массива байтов, которые будут подписаны отправителем
+        public byte[] GetDataToSign()
+        {
+            string dataToSign = $"{From}|{To}|{Amount}|{Timestamp}";
+            return Encoding.UTF8.GetBytes(dataToSign);
         }
     }
 }

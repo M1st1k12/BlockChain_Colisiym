@@ -70,7 +70,7 @@ using BlockChain_Colisiym.Services;
 //    Console.WriteLine("Select an option:");
 //    Console.WriteLine("1. Add Block");
 //    Console.WriteLine("2. Display Chain");
-//    Console.WriteLine("3. Validate Chain");
+    //    Console.WriteLine("3. Validate Chain");
 //    Console.WriteLine("4. Add 8 Blocks");
 //    Console.WriteLine("5. Difficulty History");
 //    Console.WriteLine("0. Exit");
@@ -104,73 +104,150 @@ using BlockChain_Colisiym.Services;
 //    }
 //}
 
+//var displayService = new DisplayService();
+//var blockChainService = new BlockChain();
+//var tempListTransaction = new List<Transaction>();
+//var transactionService = new TransactionService();
+//
+//// Стартовые 4 блока и 12 разных транзакций
+//await blockChainService.AddBlockAsync(new List<Transaction>
+//{
+//    transactionService.CreateTransaction("Alex", "Bob", 50),
+//    transactionService.CreateTransaction("Bob", "Eva", 20),
+//    transactionService.CreateTransaction("Eva", "Dave", 15)
+//});
+//
+//await blockChainService.AddBlockAsync(new List<Transaction>
+//{
+//    transactionService.CreateTransaction("Dave", "Alex", 10),
+//    transactionService.CreateTransaction("Alex", "Eva", 35),
+//    transactionService.CreateTransaction("Bob", "Dave", 40)
+//});
+//
+//await blockChainService.AddBlockAsync(new List<Transaction>
+//{
+//    transactionService.CreateTransaction("Eva", "Alex", 25),
+//    transactionService.CreateTransaction("Dave", "Bob", 60),
+//    transactionService.CreateTransaction("Alex", "Dave", 12)
+//});
+//
+//await blockChainService.AddBlockAsync(new List<Transaction>
+//{
+//    transactionService.CreateTransaction("Bob", "Alex", 30),
+//    transactionService.CreateTransaction("Eva", "Bob", 18),
+//    transactionService.CreateTransaction("Dave", "Eva", 45)
+//});
+//
+//while (true)
+//{
+//    Console.WriteLine();
+//    Console.WriteLine("Select an option:");
+//    Console.WriteLine("1. Add Block");
+//    Console.WriteLine("2. Add Transaction");
+//    Console.WriteLine("3. Display Chain");
+//    Console.WriteLine("4. Display Transaction");
+//    Console.WriteLine("5. Chain Valid");
+//    Console.WriteLine("6. Add 20 Blocks");
+//    Console.WriteLine("7. Search Transaction by Id");
+//    Console.WriteLine("8. Search Transactions by User");
+//    Console.WriteLine("0. Exit");
+//    Console.Write("Choice: ");
+//    var enter = Console.ReadLine();
+//    Console.WriteLine();
+//
+//    switch (enter)
+//    {
+//        case "1":
+//            await blockChainService.AddBlockAsync(tempListTransaction);
+//            tempListTransaction.Clear();
+//            Console.WriteLine("Block added.");
+//            break;
+//        case "2":
+//            Console.Write("From: ");
+//            var from = Console.ReadLine();
+//            Console.Write("To: ");
+//            var to = Console.ReadLine();
+//            Console.Write("Amount: ");
+//            var amount = decimal.Parse(Console.ReadLine());
+//            tempListTransaction.Add(transactionService.CreateTransaction(from, to, amount));
+//            Console.WriteLine("Transaction added.");
+//            break;
+//        case "3":
+//            displayService.DisplayChain(blockChainService);
+//            break;
+//        case "4":
+//            displayService.DisplayTransactions(tempListTransaction);
+//            break;
+//        case "5":
+//            var isValid = blockChainService.IsValid();
+//            Console.WriteLine($"Is chain valid? {isValid}");
+//            break;
+//        case "6":
+//            for (int i = 0; i < 20; i++)
+//            {
+//                await blockChainService.AddBlockAsync(tempListTransaction);
+//                tempListTransaction.Clear();
+//            }
+//            Console.WriteLine("20 blocks added.");
+//            break;
+//        case "7":
+//            Console.Write("Enter Transaction Id: ");
+//            var txId = Console.ReadLine();
+//            blockChainService.SearchTransactionById(txId);
+//            break;
+//        case "8":
+//            Console.Write("Enter user name: ");
+//            var user = Console.ReadLine();
+//            Console.WriteLine("Filter: 1 - All, 2 - Sent only, 3 - Received only");
+//            Console.Write("Select filter: ");
+//            var filter = Console.ReadLine();
+//            blockChainService.SearchTransactionsByUser(user, filter);
+//            break;
+//        case "0":
+//            return;
+//        default:
+//            Console.WriteLine("Invalid option. Please try again.");
+//            break;
+//    }
+//}
+
 var displayService = new DisplayService();
 var blockChainService = new BlockChain();
 var tempListTransaction = new List<Transaction>();
 var transactionService = new TransactionService();
 
-// Стартовые 4 блока и 12 разных транзакций
-await blockChainService.AddBlockAsync(new List<Transaction>
-{
-    transactionService.CreateTransaction("Alex", "Bob", 50),
-    transactionService.CreateTransaction("Bob", "Eva", 20),
-    transactionService.CreateTransaction("Eva", "Dave", 15)
-});
+var walletService = new WalletService();
 
-await blockChainService.AddBlockAsync(new List<Transaction>
-{
-    transactionService.CreateTransaction("Dave", "Alex", 10),
-    transactionService.CreateTransaction("Alex", "Eva", 35),
-    transactionService.CreateTransaction("Bob", "Dave", 40)
-});
-
-await blockChainService.AddBlockAsync(new List<Transaction>
-{
-    transactionService.CreateTransaction("Eva", "Alex", 25),
-    transactionService.CreateTransaction("Dave", "Bob", 60),
-    transactionService.CreateTransaction("Alex", "Dave", 12)
-});
-
-await blockChainService.AddBlockAsync(new List<Transaction>
-{
-    transactionService.CreateTransaction("Bob", "Alex", 30),
-    transactionService.CreateTransaction("Eva", "Bob", 18),
-    transactionService.CreateTransaction("Dave", "Eva", 45)
-});
+var bobwallet = walletService.CreateWallet("Bob");
+var alicewallet = walletService.CreateWallet("Alice");
+var charliewallet = walletService.CreateWallet("Charlie");
 
 while (true)
 {
-    Console.WriteLine();
-    Console.WriteLine("Select an option:");
     Console.WriteLine("1. Add Block");
     Console.WriteLine("2. Add Transaction");
     Console.WriteLine("3. Display Chain");
     Console.WriteLine("4. Display Transaction");
     Console.WriteLine("5. Chain Valid");
     Console.WriteLine("6. Add 20 Blocks");
-    Console.WriteLine("7. Search Transaction by Id");
-    Console.WriteLine("8. Search Transactions by User");
     Console.WriteLine("0. Exit");
-    Console.Write("Choice: ");
-    var enter = Console.ReadLine();
-    Console.WriteLine();
 
+    var enter = Console.ReadLine();
+    Console.Clear();
     switch (enter)
     {
         case "1":
             await blockChainService.AddBlockAsync(tempListTransaction);
             tempListTransaction.Clear();
-            Console.WriteLine("Block added.");
             break;
         case "2":
-            Console.Write("From: ");
-            var from = Console.ReadLine();
-            Console.Write("To: ");
-            var to = Console.ReadLine();
-            Console.Write("Amount: ");
-            var amount = decimal.Parse(Console.ReadLine());
-            tempListTransaction.Add(transactionService.CreateTransaction(from, to, amount));
-            Console.WriteLine("Transaction added.");
+            //Console.Write("From: ");
+            //var from = Console.ReadLine();
+            //Console.Write("To: ");
+            //var to = Console.ReadLine();
+            //Console.Write("Amount: ");
+            //var amount = decimal.Parse(Console.ReadLine());
+            tempListTransaction.Add(transactionService.CreateTransaction(alicewallet.Address, bobwallet.Address, 10, alicewallet));
             break;
         case "3":
             displayService.DisplayChain(blockChainService);
@@ -188,20 +265,6 @@ while (true)
                 await blockChainService.AddBlockAsync(tempListTransaction);
                 tempListTransaction.Clear();
             }
-            Console.WriteLine("20 blocks added.");
-            break;
-        case "7":
-            Console.Write("Enter Transaction Id: ");
-            var txId = Console.ReadLine();
-            blockChainService.SearchTransactionById(txId);
-            break;
-        case "8":
-            Console.Write("Enter user name: ");
-            var user = Console.ReadLine();
-            Console.WriteLine("Filter: 1 - All, 2 - Sent only, 3 - Received only");
-            Console.Write("Select filter: ");
-            var filter = Console.ReadLine();
-            blockChainService.SearchTransactionsByUser(user, filter);
             break;
         case "0":
             return;

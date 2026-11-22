@@ -15,16 +15,18 @@ namespace BlockChain_Colisiym.Services
             {
                 Console.WriteLine($"Index: {block.Index}");
                 Console.WriteLine($"Hash: {block.Hash}");
-                Console.WriteLine($"PrevHash: {block.PreviousHash}");
-                Console.WriteLine($"TimeStamp: {block.TimeStamp}");
-                Console.WriteLine($"Nonce: {block.Nonce}");
-                Console.WriteLine($"Difficulty: {block.DifficultyMining}");
-                Console.WriteLine($"Mining Duration: {block.MiningDuration} seconds");
+                Console.WriteLine($"Author: {block.Author}");
+                Console.WriteLine("Transaction:");
                 foreach (var transaction in block.Transactions)
                 {
-                    Console.WriteLine(transaction);
+                    Console.WriteLine($"\t{transaction}");
                 }
-                Console.WriteLine(new string('-', 30));
+                Console.WriteLine($"Previous Hash: {block.PreviousHash}");
+                Console.WriteLine($"Timestamp: {block.TimeStamp}");
+                Console.WriteLine($"DifficultyAtMining: {block.DifficultyMining}");
+                Console.WriteLine($"Nonce: {block.Nonce}");
+                Console.WriteLine($"Mining Duration: {block.MiningDuration} seconds");
+                Console.WriteLine(new string('-', 44));
             }
         }
 
