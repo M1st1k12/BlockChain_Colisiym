@@ -24,6 +24,9 @@ namespace BlockChain_Colisiym.Models
         // Подпись транзакции, созданная отправителем с помощью приватного ключа
         public byte[] Signature { get; set; }
 
+        // Свойство, указывающее, является ли транзакция coinbase (создана как вознаграждение за майнинг блока)
+        public bool IsCoinbase { get; set; }
+
         // Конструктор для создания транзакции
         public Transaction(string from, string to, decimal amount)
         {
@@ -32,6 +35,7 @@ namespace BlockChain_Colisiym.Models
             To = to;
             Amount = amount;
             Timestamp = DateTime.Now;
+            IsCoinbase = false;
         }
 
         public Transaction(string from, string to, decimal amount, byte[] publicKey)
@@ -42,6 +46,15 @@ namespace BlockChain_Colisiym.Models
             Amount = amount;
             PublicKey = publicKey;
             Timestamp = DateTime.Now;
+            IsCoinbase = false;
+        }
+
+        // Статический метод для создания coinbase транзакции, используемой для вознаграждения майнера за добавление нового блока в блокчейн
+        public static Transaction CreateCoinbaseTransaction(string minerAddress, decimal amount)
+        {
+            var tx = new Transaction("COINBASE", minerAddress, amount, null);
+            tx.IsCoinbase = true;
+            return tx;
         }
 
         // Метод для получения строкового представления транзакции в виде "Id|From|To|Amount|Timestamp"

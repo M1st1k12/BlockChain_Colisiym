@@ -37,5 +37,29 @@ namespace BlockChain_Colisiym.Services
                 Console.WriteLine(transaction);
             }
         }
+
+        // Выводит все транзакции, где этот кошелек принимал участие
+        public void PrintTransactionHistory(BlockChain blockchain, Wallet wallet)
+        {
+            Console.WriteLine($"Transaction history for {wallet.Name} ({wallet.Address}):");
+            bool found = false;
+
+            foreach (var block in blockchain.Chain)
+            {
+                foreach (var tx in block.Transactions)
+                {
+                    if (tx.From == wallet.Address || tx.To == wallet.Address)
+                    {
+                        Console.WriteLine($"[Block #{block.Index}] {tx}");
+                        found = true;
+                    }
+                }
+            }
+
+            if (!found)
+            {
+                Console.WriteLine("No transactions found for this wallet.");
+            }
+        }
     }
 }

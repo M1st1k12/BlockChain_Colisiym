@@ -12,12 +12,14 @@ namespace BlockChain_Colisiym.Services
         private int _difficulty = 1;
         public readonly decimal _targetBlockTime = 2; 
         public readonly int _adjustEveryNBlocks = 3;
+        private readonly decimal _miningReward = 10; // Reward for mining a block
 
 
         public List<Block> Chain { get; set; }
         private readonly HashingService _hashingService;
         private readonly MiningService _miningService;
         private readonly WalletService _walletService;
+        private readonly BalanceService _balanceService;
         private readonly TransactionService _transactionService;
 
         public int Difficulty { get; private set; } = 10;
@@ -31,6 +33,7 @@ namespace BlockChain_Colisiym.Services
             _miningService = new MiningService(_hashingService);
             _transactionService = new TransactionService();
             _walletService = new WalletService();
+            _balanceService = new BalanceService();
             AddGenesisBlock("Genesis Block");
         }
 
@@ -138,6 +141,89 @@ namespace BlockChain_Colisiym.Services
             await _miningService.MineBlockAsync(newBlock, _difficulty);
             Chain.Add(newBlock);
             AdjustDifficulty();
+        }
+
+        public void AddBlock(List<Transaction> transactions, string minerAddress, List<Transaction> mempool)
+        {
+            // Проверка валидности транзакций перед добавлением блока
+            foreach (var tx in transactions)
+            {
+                var isValid = _transactionService.ValidateTransaction(tx);
+                if (!isValid.isValid)
+                {
+                    throw new ArgumentException($"Invalid transaction: {isValid.errorMessage}");
+                }
+
+                var balanceCheck = _transactionService.ValidateBalance(tx, Chain, mempool);
+                if (!balanceCheck.isValid)
+                {
+                    throw new ArgumentException($"Invalid transaction: {balanceCheck.errorMessage}");
+                }
+            }
+
+            var transactionCopy = new List<Transaction>(transactions);
+            var coinbaseTransaction = Transaction.CreateCoinbaseTransaction(minerAddress, _miningReward);
+            transactionCopy.Insert(0, coinbaseTransaction);
+
+            var lastBlock = Chain[Chain.Count - 1];
+            var newBlock = new Block
+            {
+                Index = lastBlock.Index + 1,
+                Transactions = transactionCopy,
+                PreviousHash = lastBlock.Hash,
+                TimeStamp = DateTime.Now,
+                Author = "Colisiym",
+                DifficultyMining = _difficulty
+            };
+
+            _miningService.MineBlockAsync(newBlock, _difficulty).Wait();
+            Chain.Add(newBlock);
+            AdjustDifficulty();
+        }
+
+        public async Task AddBlockAsync(List<Transaction> transactions, string minerAddress, List<Transaction> mempool)
+        {
+            // Проверка валидности транзакций перед добавлением блока
+            var checkedFromMempool = new List<Transaction>();
+            foreach (var tx in transactions)
+            {
+                var isValid = _transactionService.ValidateTransaction(tx);
+                if (!isValid.isValid)
+                {
+                    throw new ArgumentException($"Invalid transaction: {isValid.errorMessage}");
+                }
+
+                var balanceCheck = _transactionService.ValidateBalance(tx, Chain, checkedFromMempool);
+                if (!balanceCheck.isValid)
+                {
+                    throw new ArgumentException($"Invalid transaction: {balanceCheck.errorMessage}");
+                }
+                checkedFromMempool.Add(tx);
+            }
+
+            var transactionCopy = new List<Transaction>(transactions);
+            var coinbaseTransaction = Transaction.CreateCoinbaseTransaction(minerAddress, _miningReward);
+            transactionCopy.Insert(0, coinbaseTransaction);
+
+            var lastBlock = Chain[Chain.Count - 1];
+            var newBlock = new Block
+            {
+                Index = lastBlock.Index + 1,
+                Transactions = transactionCopy,
+                PreviousHash = lastBlock.Hash,
+                TimeStamp = DateTime.Now,
+                Author = "Colisiym",
+                DifficultyMining = _difficulty
+            };
+
+            await _miningService.MineBlockAsync(newBlock, _difficulty);
+            Chain.Add(newBlock);
+            AdjustDifficulty();
+        }
+
+        public decimal GetBalance(string address)
+        {
+            return _balanceService.GetBalance(address, Chain);
         }
 
         private void AdjustDifficulty()
@@ -290,6 +376,85 @@ namespace BlockChain_Colisiym.Services
             {
                 Console.WriteLine($"No transactions found for user '{user}'.");
             }
+        }
+
+        // Рівень 3. Blockchain Audit
+        public void AuditBlockchain()
+        {
+            bool isChainValid = true;
+            var seenTransactionIds = new List<string>();
+            var userOps = new Dictionary<string, int>();
+
+            int totalBlocks = Chain.Count;
+            int totalTransactions = 0;
+            decimal totalAmount = 0;
+
+            for (int i = 1; i < Chain.Count; i++)
+            {
+                var currentBlock = Chain[i];
+                var previousBlock = Chain[i - 1];
+
+                if (currentBlock.Hash != _hashingService.ComputeBlockHash(currentBlock))
+                {
+                    Console.WriteLine($"Invalid block #{currentBlock.Index}: wrong Hash");
+                    isChainValid = false;
+                }
+
+                if (currentBlock.PreviousHash != previousBlock.Hash)
+                {
+                    Console.WriteLine($"Invalid block #{currentBlock.Index}: wrong PreviousHash");
+                    isChainValid = false;
+                }
+
+                foreach (var tx in currentBlock.Transactions)
+                {
+                    totalTransactions++;
+                    totalAmount += tx.Amount;
+
+                    if (tx.From != "COINBASE")
+                    {
+                        if (!userOps.ContainsKey(tx.From)) userOps[tx.From] = 0;
+                        userOps[tx.From]++;
+                    }
+                    if (!userOps.ContainsKey(tx.To)) userOps[tx.To] = 0;
+                    userOps[tx.To]++;
+
+                    if (seenTransactionIds.Contains(tx.Id))
+                    {
+                        Console.WriteLine($"Invalid block #{currentBlock.Index}: duplicate Transaction Id {tx.Id}");
+                        isChainValid = false;
+                    }
+                    else
+                    {
+                        seenTransactionIds.Add(tx.Id);
+                    }
+
+                    if (!tx.IsCoinbase)
+                    {
+                        var check = _transactionService.ValidateTransaction(tx);
+                        if (!check.isValid)
+                        {
+                            Console.WriteLine($"Invalid block #{currentBlock.Index}: transaction error ({check.errorMessage})");
+                            isChainValid = false;
+                        }
+                    }
+                }
+            }
+
+            string topUser = "None";
+            if (userOps.Count > 0)
+            {
+                var max = userOps.OrderByDescending(x => x.Value).First();
+                topUser = $"{max.Key} ({max.Value} tx)";
+            }
+
+            Console.WriteLine("------------------------------");
+            Console.WriteLine($"Blocks count: {totalBlocks}");
+            Console.WriteLine($"Transactions count: {totalTransactions}");
+            Console.WriteLine($"Total amount: {totalAmount}");
+            Console.WriteLine($"Most active user: {topUser}");
+            Console.WriteLine($"Blockchain valid: {isChainValid}");
+            Console.WriteLine("------------------------------");
         }
 
     }

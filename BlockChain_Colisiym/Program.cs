@@ -215,12 +215,39 @@ var displayService = new DisplayService();
 var blockChainService = new BlockChain();
 var tempListTransaction = new List<Transaction>();
 var transactionService = new TransactionService();
+var balanceService = new BalanceService();
 
 var walletService = new WalletService();
 
 var bobwallet = walletService.CreateWallet("Bob");
 var alicewallet = walletService.CreateWallet("Alice");
 var charliewallet = walletService.CreateWallet("Charlie");
+
+decimal GetAvailableBalance(string address)
+{
+    var balance = balanceService.GetBalance(address, blockChainService.Chain);
+    foreach (var tx in tempListTransaction)
+    {
+        if (tx.From == address) balance -= tx.Amount;
+    }
+    return balance;
+}
+
+Wallet SelectWallet(string prompt)
+{
+    Console.WriteLine(prompt);
+    Console.WriteLine($"1. Alice ({alicewallet.Address}) - Balance: {GetAvailableBalance(alicewallet.Address)}");
+    Console.WriteLine($"2. Bob ({bobwallet.Address}) - Balance: {GetAvailableBalance(bobwallet.Address)}");
+    Console.WriteLine($"3. Charlie ({charliewallet.Address}) - Balance: {GetAvailableBalance(charliewallet.Address)}");
+    Console.Write("Select: ");
+    var choice = Console.ReadLine();
+    return choice switch
+    {
+        "2" => bobwallet,
+        "3" => charliewallet,
+        _ => alicewallet
+    };
+}
 
 while (true)
 {
@@ -230,6 +257,12 @@ while (true)
     Console.WriteLine("4. Display Transaction");
     Console.WriteLine("5. Chain Valid");
     Console.WriteLine("6. Add 20 Blocks");
+    Console.WriteLine("7. Display Wallet Balances");
+    Console.WriteLine("8. Print Wallet Transaction History");
+    Console.WriteLine("9. Search Transaction by Id");
+    Console.WriteLine("10. Search Transactions by User");
+    Console.WriteLine("11. Audit Blockchain");
+    Console.WriteLine("12. Tamper Transaction Amount (Hack Test)");
     Console.WriteLine("0. Exit");
 
     var enter = Console.ReadLine();
@@ -237,17 +270,45 @@ while (true)
     switch (enter)
     {
         case "1":
-            await blockChainService.AddBlockAsync(tempListTransaction);
-            tempListTransaction.Clear();
+            var miner = SelectWallet("Who will mine the block (+10 coins)?");
+            try
+            {
+                await blockChainService.AddBlockAsync(tempListTransaction, miner.Address, tempListTransaction);
+                tempListTransaction.Clear();
+                Console.WriteLine($"Block mined! {miner.Name} received 10 coins.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                tempListTransaction.Clear();
+            }
             break;
         case "2":
-            //Console.Write("From: ");
-            //var from = Console.ReadLine();
-            //Console.Write("To: ");
-            //var to = Console.ReadLine();
-            //Console.Write("Amount: ");
-            //var amount = decimal.Parse(Console.ReadLine());
-            tempListTransaction.Add(transactionService.CreateTransaction(alicewallet.Address, bobwallet.Address, 10, alicewallet));
+            //tempListTransaction.Add(transactionService.CreateTransaction(alicewallet.Address, bobwallet.Address, 10, alicewallet));
+            var sender = SelectWallet("From:");
+            var receiver = SelectWallet(" To:");
+            Console.Write("Enter Amount: ");
+            if (decimal.TryParse(Console.ReadLine(), out decimal amount))
+            {
+                try
+                {
+                    var tx = transactionService.CreateTransaction(sender.Address, receiver.Address, amount, sender);
+                    var balanceCheck = transactionService.ValidateBalance(tx, blockChainService.Chain, tempListTransaction);
+                    if (!balanceCheck.isValid)
+                    {
+                        Console.WriteLine($"Error: {balanceCheck.errorMessage}");
+                    }
+                    else
+                    {
+                        tempListTransaction.Add(tx);
+                        Console.WriteLine($"Transaction added: {sender.Name} -> {receiver.Name} ({amount} coins)");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+            }
             break;
         case "3":
             displayService.DisplayChain(blockChainService);
@@ -262,8 +323,40 @@ while (true)
         case "6":
             for (int i = 0; i < 20; i++)
             {
-                await blockChainService.AddBlockAsync(tempListTransaction);
+                await blockChainService.AddBlockAsync(tempListTransaction, alicewallet.Address, tempListTransaction);
                 tempListTransaction.Clear();
+            }
+            break;
+        case "7":
+            Console.WriteLine("Wallet Balances:");
+            Console.WriteLine($"Bob ({bobwallet.Address}): {balanceService.GetBalance(bobwallet.Address, blockChainService.Chain)}");
+            Console.WriteLine($"Alice ({alicewallet.Address}): {balanceService.GetBalance(alicewallet.Address, blockChainService.Chain)}");
+            Console.WriteLine($"Charlie ({charliewallet.Address}): {balanceService.GetBalance(charliewallet.Address, blockChainService.Chain)}");
+            break;
+        case "8":
+            var selectedWallet = SelectWallet("Select wallet to view transaction history:");
+            displayService.PrintTransactionHistory(blockChainService, selectedWallet);
+            break;
+        case "9":
+            Console.Write("Enter Transaction Id: ");
+            var txId = Console.ReadLine();
+            blockChainService.SearchTransactionById(txId);
+            break;
+        case "10":
+            var searchWallet = SelectWallet("Select user wallet to search:");
+            Console.WriteLine("Filter: 1 - All, 2 - Sent only, 3 - Received only");
+            Console.Write("Select filter: ");
+            var filter = Console.ReadLine();
+            blockChainService.SearchTransactionsByUser(searchWallet.Address, filter);
+            break;
+        case "11":
+            blockChainService.AuditBlockchain();
+            break;
+        case "12":
+            if (blockChainService.Chain.Count > 1 && blockChainService.Chain[1].Transactions.Count > 0)
+            {
+                blockChainService.Chain[1].Transactions[0].Amount = 999;
+                Console.WriteLine("Changed Block 1 transaction Amount to 999");
             }
             break;
         case "0":

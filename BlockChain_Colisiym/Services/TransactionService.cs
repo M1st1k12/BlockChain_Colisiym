@@ -10,6 +10,7 @@ namespace BlockChain_Colisiym.Services
     public class TransactionService
     {
         private readonly WalletService _walletService = new WalletService();
+        private readonly BalanceService _balanceService = new BalanceService();
 
         //public Transaction CreateTransaction(string from, string to, decimal amount)
         //{
@@ -60,6 +61,45 @@ namespace BlockChain_Colisiym.Services
             if (!_walletService.VerifySignature(transaction.GetDataToSign(), transaction.Signature, transaction.PublicKey))
             {
                 return (false, "Invalid signature.");
+            }
+            return (true, string.Empty);
+        }
+
+        // Метод для проверки, имеет ли определенный адрес достаточно баланса для совершения транзакции
+        public (bool isValid, string errorMessage) ValidateBalance(Transaction transaction, List<Block> chain)
+        {
+            // Проверка, является ли транзакция coinbase (создана как вознаграждение за майнинг блока)
+            if (transaction.IsCoinbase)
+            {
+                return (true, string.Empty); // Coinbase transactions are always valid in terms of balance
+            }
+            if (!_balanceService.HasSufficientBalance(transaction.From, transaction.Amount, chain))
+            {
+                return (false, "Insufficient balance for the transaction.");
+            }
+            var validationResult = ValidateTransaction(transaction);
+            if (!validationResult.isValid)
+            {
+                return validationResult;
+            }
+            return (true, string.Empty);
+        }
+
+        public (bool isValid, string errorMessage) ValidateBalance(Transaction transaction, List<Block> chain, List<Transaction> mempool)
+        {
+            // Проверка, является ли транзакция coinbase (создана как вознаграждение за майнинг блока)
+            if (transaction.IsCoinbase)
+            {
+                return (true, string.Empty); // Coinbase transactions are always valid in terms of balance
+            }
+            if (!_balanceService.HasSufficientBalance(transaction.From, transaction.Amount, chain, mempool))
+            {
+                return (false, "Insufficient balance for the transaction.");
+            }
+            var validationResult = ValidateTransaction(transaction);
+            if (!validationResult.isValid)
+            {
+                return validationResult;
             }
             return (true, string.Empty);
         }
